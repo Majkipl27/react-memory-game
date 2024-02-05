@@ -1,13 +1,8 @@
+import EditTilesDialog from "@/Layout/EditTilesDialog";
 import Card from "@/components/Card";
 import { Button } from "@/components/ui/button";
+import { card } from "@/lib/interfaces";
 import { useEffect, useState } from "react";
-
-interface card {
-  id: number;
-  content: string;
-  isCorrect: boolean;
-  isFlipped: boolean;
-}
 
 export default function Game(): JSX.Element {
   const [tries, setTries] = useState<number>(0);
@@ -29,10 +24,11 @@ export default function Game(): JSX.Element {
     { id: 15, content: "🍩", isCorrect: false, isFlipped: false },
     { id: 16, content: "🍪", isCorrect: false, isFlipped: false },
   ]);
-  const [canFlip, setCanFlip] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
 
-  function flipCard(id: number) {
+  const [canFlip, setCanFlip] = useState<boolean>(false);
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
+
+  function flipCard(id: number): void {
     if (!canFlip) return;
     setCards((cards) =>
       cards.map((card) =>
@@ -42,7 +38,7 @@ export default function Game(): JSX.Element {
     setCanFlip(false);
   }
 
-  function checkIfCorrect() {
+  function checkIfCorrect(): void {
     const flippedCards = cards.filter(
       (card) => card.isFlipped && !card.isCorrect
     );
@@ -94,7 +90,7 @@ export default function Game(): JSX.Element {
 
   useEffect(checkIfCorrect, [cards]);
 
-  function startGame() {
+  function startGame(): void {
     setTries(0);
     setHasStarted(true);
     setTimeout(() => {
@@ -111,7 +107,7 @@ export default function Game(): JSX.Element {
     }, 5000);
   }
 
-  function isGameFinished() {
+  function isGameFinished(): boolean {
     return cards.every((card) => card.isCorrect);
   }
 
@@ -119,7 +115,7 @@ export default function Game(): JSX.Element {
     <div className="flex-1 flex flex-col justify-center items-center gap-8">
       {hasStarted && (
         <>
-          <div className="grid grid-cols-4 grid-rows-4 w-[600px] h-[600px] gap-2">
+          <div className={`grid w-[600px] min-h-[600px] grid-cols-4 gap-2`}>
             {cards.map((card, i) => (
               <Card
                 key={card.id}
@@ -134,7 +130,14 @@ export default function Game(): JSX.Element {
           <p className="text-foreground">Liczba prób: {tries}</p>
         </>
       )}
-      {!hasStarted && <Button onClick={startGame}>Start</Button>}
+      {!hasStarted && (
+        <div className="flex items-center gap-4">
+          <Button onClick={startGame} variant="outline">
+            Start
+          </Button>
+          <EditTilesDialog setCards={setCards} />
+        </div>
+      )}
     </div>
   );
 }
