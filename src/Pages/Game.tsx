@@ -1,6 +1,7 @@
 import EditTilesDialog from "@/Layout/EditTilesDialog";
 import Card from "@/components/Card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { card } from "@/lib/interfaces";
 import { useEffect, useState } from "react";
 
@@ -111,6 +112,30 @@ export default function Game(): JSX.Element {
     return cards.every((card) => card.isCorrect);
   }
 
+  function exportJson(): void {
+    const a = document.createElement("a");
+    const file = new Blob([JSON.stringify(cards)], { type: "text/plain" });
+    a.href = URL.createObjectURL(file);
+    a.download = "cards.json";
+    a.click();
+  }
+
+  function loadJson(e: React.ChangeEvent<HTMLInputElement>): void {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== "application/json") {
+      alert("Invalid file type. Please upload a .json file");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result;
+      setCards(JSON.parse(content as string));
+    };
+    reader.readAsText(file);
+    alert("Tiles have been uploaded successfully.");
+  }
+
   return (
     <div className="flex-1 flex flex-col justify-center items-center gap-8">
       {hasStarted && (
@@ -131,12 +156,23 @@ export default function Game(): JSX.Element {
         </>
       )}
       {!hasStarted && (
-        <div className="flex items-center gap-4">
-          <Button onClick={startGame} variant="outline">
-            Start
-          </Button>
-          <EditTilesDialog setCards={setCards} />
-        </div>
+        <>
+          <Button onClick={startGame}>Start</Button>
+          <p>You can import / export your set below.</p>
+          <div className="flex items-center gap-4">
+            <EditTilesDialog setCards={setCards} />
+            <Input
+              type="file"
+              name="import"
+              accept=".json"
+              onChange={loadJson}
+              placeholder="Import Json"
+            />
+            <Button variant="outline" onClick={exportJson}>
+              Export json
+            </Button>
+          </div>
+        </>
       )}
     </div>
   );
